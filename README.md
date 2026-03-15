@@ -62,6 +62,7 @@ Key fields: `email`, `password`, optional `user_id`, `client_id`, `client_secret
 - HTTPS only; no local/Bluetooth control exposed here.
 
 ## Prior Work / References
+- Original prior work and project templating from [steipete/eightctl](https://github.com/steipete/eightctl)
 - Go CLI `clim8`: https://github.com/blacktop/clim8
 - MCP server (Node/TS): https://github.com/elizabethtrykin/8sleep-mcp
 - Python library `pyEight`: https://github.com/mezz64/pyEight
