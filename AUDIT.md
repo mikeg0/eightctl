@@ -23,7 +23,7 @@ All endpoints use: `Authorization: Bearer {access_token}`
 
 ---
 
-## AVAILABLE Endpoints (38 confirmed working)
+## AVAILABLE Endpoints (38 confirmed via curl + write endpoints used by CLI)
 
 ### Auth
 | Method | Host | Path | Notes |
@@ -40,7 +40,7 @@ All endpoints use: `Authorization: Bearer {access_token}`
 ### Device
 | Method | Host | Path | Notes |
 |--------|------|------|-------|
-| GET | client-api | `/v1/devices/{deviceId}` | Full device state (heating levels, firmware, kelvin, wifi) |
+| GET | client-api | `/v1/devices/{deviceId}` | Full device state (heating levels, firmware, kelvin, wifi); also used to infer bed presence |
 | GET | client-api | `/v1/devices/{deviceId}?filter=...` | Filtered device fields (ownerId, leftUserId, etc.) |
 | GET | client-api | `/v1/devices/{deviceId}/online` | Online status check |
 
@@ -70,17 +70,40 @@ All endpoints use: `Authorization: Bearer {access_token}`
 | Method | Host | Path | Notes |
 |--------|------|------|-------|
 | GET | client-api | `/v1/users/{userId}/temperature` | Current temperature state |
-| GET | app-api | `/v1/users/{userId}/temperature` | Same data, app-api host |
+| PUT | client-api | `/v1/users/{userId}/temperature` | Set temperature level (`currentLevel`) |
+| PUT | app-api | `/v1/users/{userId}/temperature` | Set power state (`currentState.type`: `smart`/`off`) |
 | GET | app-api | `/v1/users/{userId}/temperature/pod` | Pod-specific temp with `?ignoreDeviceErrors=false` |
 | GET | app-api | `/v1/users/{userId}/temperature/all` | All temperature settings |
 | GET | app-api | `/v1/users/{userId}/temp-events` | Temperature event history |
 | GET | app-api | `/v2/smart_temperature/status/{deviceId}` | Smart temp status (left/right levels, activity) |
 
+### Temperature Schedules
+| Method | Host | Path | Notes |
+|--------|------|------|-------|
+| GET | app-api | `/v1/users/{userId}/temperature/schedules` | List temperature schedules |
+| POST | app-api | `/v1/users/{userId}/temperature/schedules` | Create schedule |
+| PATCH | app-api | `/v1/users/{userId}/temperature/schedules/{id}` | Update schedule |
+| DELETE | app-api | `/v1/users/{userId}/temperature/schedules/{id}` | Delete schedule |
+
+### Temperature Modes (Nap / Hot Flash)
+| Method | Host | Path | Notes |
+|--------|------|------|-------|
+| POST | app-api | `/v1/users/{userId}/temperature/nap-mode/activate` | Activate nap mode |
+| POST | app-api | `/v1/users/{userId}/temperature/nap-mode/deactivate` | Deactivate nap mode |
+| POST | app-api | `/v1/users/{userId}/temperature/nap-mode/extend` | Extend nap mode |
+| GET | app-api | `/v1/users/{userId}/temperature/nap-mode/status` | Nap mode status |
+| POST | app-api | `/v1/users/{userId}/temperature/hot-flash-mode/activate` | Activate hot flash mode |
+| POST | app-api | `/v1/users/{userId}/temperature/hot-flash-mode/deactivate` | Deactivate hot flash mode |
+| GET | app-api | `/v1/users/{userId}/temperature/hot-flash-mode` | Hot flash mode status |
+
 ### Routines & Alarms
 | Method | Host | Path | Notes |
 |--------|------|------|-------|
 | GET | app-api | `/v2/users/{userId}/routines` | List all routines/alarms |
+| PUT | app-api | `/v2/users/{userId}/routines` | Update routines (used for dismiss/dismiss-all) |
 | GET | app-api | `/v2/users/{userId}/alarms` | List alarms (v2) |
+| PUT | app-api | `/v1/users/{userId}/alarms/{alarmId}/snooze` | Snooze an alarm |
+| PUT | app-api | `/v1/users/{userId}/vibration-test` | Trigger vibration test |
 
 ### Autopilot
 | Method | Host | Path | Notes |
@@ -93,10 +116,23 @@ All endpoints use: `Authorization: Bearer {access_token}`
 | GET | app-api | `/v1/audio/categories` | Audio categories |
 | GET | app-api | `/v1/users/{userId}/audio/tracks` | Available audio tracks |
 
+### Base
+| Method | Host | Path | Notes |
+|--------|------|------|-------|
+| GET | app-api | `/v1/users/{userId}/base` | Base state (may return "No Associated Adjustable Base") |
+| POST | app-api | `/v1/users/{userId}/base/angle` | Set head/foot angles |
+
 ### Household
 | Method | Host | Path | Notes |
 |--------|------|------|-------|
 | GET | app-api | `/v1/household/users/{userId}/summary` | Household sets, devices |
+
+### Travel
+| Method | Host | Path | Notes |
+|--------|------|------|-------|
+| GET | app-api | `/v1/users/{userId}/travel/trips` | List travel trips |
+| POST | app-api | `/v1/users/{userId}/travel/trips` | Create a trip (client method) |
+| DELETE | app-api | `/v1/users/{userId}/travel/trips/{tripId}` | Delete a trip (client method) |
 
 ### Misc
 | Method | Host | Path | Notes |
@@ -107,7 +143,6 @@ All endpoints use: `Authorization: Bearer {access_token}`
 | GET | app-api | `/v1/users/{userId}/away-mode` | Away mode status |
 | GET | app-api | `/v1/users/{userId}/notifications?active=true` | Active notifications |
 | GET | app-api | `/v1/users/{userId}/truth-tags` | Presence truth tags |
-| GET | app-api | `/v1/users/{userId}/travel/trips` | Travel trips |
 | GET | app-api | `/v1/users/{userId}/challenges` | User challenges |
 | GET | app-api | `/v1/users/{userId}/bedtime/recommendation` | Bedtime recommendation |
 | GET | app-api | `/v1/devices/{deviceId}/priming/tasks` | Priming tasks |
@@ -131,7 +166,7 @@ All endpoints use: `Authorization: Bearer {access_token}`
 | app-api | `/v1/users/{userId}/intervals` | **Wrong host** — works on client-api |
 | app-api | `/v1/users/{userId}/trends` | **Wrong host** — works on client-api |
 | app-api | `/v1/users/{userId}/audio/player` | Returns "No Associated Speaker / BaseNotPaired" |
-| both | `/v1/users/{userId}/base` | app-api returns "No Associated Adjustable Base" |
+| both | `/v1/users/{userId}/base` | app-api may return "No Associated Adjustable Base" if no base is paired |
 
 ---
 

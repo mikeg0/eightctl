@@ -34,16 +34,16 @@ eightctl daemon --dry-run
 ## Command Surface
 - **Power & temp:** `on`, `off`, `temp <level>`, `status`
 - **Schedules & daemon:** `schedule list|create|update|delete|next`, `daemon`
-- **Alarms:** `alarm list|create|update|delete|snooze|dismiss|dismiss-all|vibration-test`
+- **Alarms:** `alarm list|snooze|dismiss|dismiss-all|vibration-test`
 - **Temperature modes:** `tempmode nap on|off|extend|status`, `tempmode hotflash on|off|status`, `tempmode events`
-- **Audio:** `audio tracks|categories|state|play|pause|seek|volume|pair|next`, `audio favorites list|add|remove`
-- **Base:** `base info|angle|presets|preset-run|vibration-test`
-- **Device:** `device info|peripherals|owner|warranty|online|priming-tasks|priming-schedule`
-- **Metrics & insights:** `sleep day|range`, `presence`, `metrics trends|intervals|summary|aggregate|insights`
-- **Autopilot:** `autopilot details|history|recap`, `autopilot set-level-suggestions`, `autopilot set-snore-mitigation`
-- **Travel:** `travel trips|create-trip|delete-trip|plans|create-plan|update-plan|tasks|airport-search|flight-status`
-- **Household:** `household summary|schedule|current-set|invitations|devices|users|guests`
-- **Misc:** `tracks`, `feats`, `whoami`, `version`
+- **Audio:** `audio tracks|categories`
+- **Base:** `base info|angle`
+- **Device:** `device info|online|priming-tasks`
+- **Sleep & metrics:** `sleep day|range`, `presence`, `metrics trends|intervals|summary|aggregate|insights|llm-insights`
+- **Autopilot:** `autopilot details`
+- **Travel:** `travel trips`
+- **Household:** `household summary`
+- **Misc:** `whoami`, `version`, `logout`
 
 Use `--output table|json|csv` and `--fields field1,field2` to shape output. `--verbose` enables debug logs; `--quiet` hides the config banner.
 
