@@ -60,8 +60,6 @@ func init() {
 	rootCmd.AddCommand(offCmd)
 	rootCmd.AddCommand(tempCmd)
 	rootCmd.AddCommand(statusCmd)
-	rootCmd.AddCommand(tracksCmd)
-	rootCmd.AddCommand(featsCmd)
 	rootCmd.AddCommand(sleepCmd)
 	rootCmd.AddCommand(daemonCmd)
 	rootCmd.AddCommand(alarmCmd)

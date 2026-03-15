@@ -48,7 +48,7 @@ var sleepRangeCmd = &cobra.Command{
 				return err
 			}
 				// Convert durations from seconds to hours for readability
-			durationHrs := day.Duration / 3600
+			durationHrs := day.SleepDuration / 3600
 			deepHrs := day.DeepDuration / 3600
 			remHrs := day.RemDuration / 3600
 

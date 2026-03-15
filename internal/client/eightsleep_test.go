@@ -48,6 +48,7 @@ func mockServer(t *testing.T) (*httptest.Server, *Client) {
 	// client with pre-set token to skip auth
 	c := New("email", "pass", "", "", "")
 	c.BaseURL = srv.URL
+	c.AppBaseURL = srv.URL
 	c.token = "t"
 	c.tokenExp = time.Now().Add(time.Hour)
 	c.HTTP = srv.Client()

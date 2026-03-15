@@ -15,15 +15,16 @@ type TemperatureSchedule struct {
 	Enabled    bool   `json:"enabled"`
 }
 
+// ListSchedules lists temperature schedules from app-api.
 func (c *Client) ListSchedules(ctx context.Context) ([]TemperatureSchedule, error) {
 	if err := c.requireUser(ctx); err != nil {
 		return nil, err
 	}
-	path := fmt.Sprintf("/users/%s/temperature/schedules", c.UserID)
+	path := fmt.Sprintf("/v1/users/%s/temperature/schedules", c.UserID)
 	var res struct {
 		Schedules []TemperatureSchedule `json:"schedules"`
 	}
-	if err := c.do(ctx, http.MethodGet, path, nil, nil, &res); err != nil {
+	if err := c.doApp(ctx, http.MethodGet, path, nil, nil, &res); err != nil {
 		return nil, err
 	}
 	return res.Schedules, nil
@@ -33,11 +34,11 @@ func (c *Client) CreateSchedule(ctx context.Context, s TemperatureSchedule) (*Te
 	if err := c.requireUser(ctx); err != nil {
 		return nil, err
 	}
-	path := fmt.Sprintf("/users/%s/temperature/schedules", c.UserID)
+	path := fmt.Sprintf("/v1/users/%s/temperature/schedules", c.UserID)
 	var res struct {
 		Schedule TemperatureSchedule `json:"schedule"`
 	}
-	if err := c.do(ctx, http.MethodPost, path, nil, s, &res); err != nil {
+	if err := c.doApp(ctx, http.MethodPost, path, nil, s, &res); err != nil {
 		return nil, err
 	}
 	return &res.Schedule, nil
@@ -47,11 +48,11 @@ func (c *Client) UpdateSchedule(ctx context.Context, id string, patch map[string
 	if err := c.requireUser(ctx); err != nil {
 		return nil, err
 	}
-	path := fmt.Sprintf("/users/%s/temperature/schedules/%s", c.UserID, id)
+	path := fmt.Sprintf("/v1/users/%s/temperature/schedules/%s", c.UserID, id)
 	var res struct {
 		Schedule TemperatureSchedule `json:"schedule"`
 	}
-	if err := c.do(ctx, http.MethodPatch, path, nil, patch, &res); err != nil {
+	if err := c.doApp(ctx, http.MethodPatch, path, nil, patch, &res); err != nil {
 		return nil, err
 	}
 	return &res.Schedule, nil
@@ -61,6 +62,6 @@ func (c *Client) DeleteSchedule(ctx context.Context, id string) error {
 	if err := c.requireUser(ctx); err != nil {
 		return err
 	}
-	path := fmt.Sprintf("/users/%s/temperature/schedules/%s", c.UserID, id)
-	return c.do(ctx, http.MethodDelete, path, nil, nil, nil)
+	path := fmt.Sprintf("/v1/users/%s/temperature/schedules/%s", c.UserID, id)
+	return c.doApp(ctx, http.MethodDelete, path, nil, nil, nil)
 }

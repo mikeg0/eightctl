@@ -12,7 +12,7 @@ import (
 
 var baseCmd = &cobra.Command{Use: "base", Short: "Adjustable base controls"}
 
-var baseInfoCmd = &cobra.Command{Use: "info", RunE: func(cmd *cobra.Command, args []string) error {
+var baseInfoCmd = &cobra.Command{Use: "info", Short: "Get base state", RunE: func(cmd *cobra.Command, args []string) error {
 	if err := requireAuthFields(); err != nil {
 		return err
 	}
@@ -24,52 +24,18 @@ var baseInfoCmd = &cobra.Command{Use: "info", RunE: func(cmd *cobra.Command, arg
 	return output.Print(output.Format(viper.GetString("output")), []string{"info"}, []map[string]any{{"info": res}})
 }}
 
-var baseAngleCmd = &cobra.Command{Use: "angle", RunE: func(cmd *cobra.Command, args []string) error {
+var baseAngleCmd = &cobra.Command{Use: "angle", Short: "Set base angles", RunE: func(cmd *cobra.Command, args []string) error {
 	if err := requireAuthFields(); err != nil {
 		return err
 	}
-	head := viper.GetInt("head")
-	foot := viper.GetInt("foot")
+	head, _ := cmd.Flags().GetInt("head")
+	foot, _ := cmd.Flags().GetInt("foot")
 	cl := client.New(viper.GetString("email"), viper.GetString("password"), viper.GetString("user_id"), viper.GetString("client_id"), viper.GetString("client_secret"))
 	return cl.Base().SetAngle(context.Background(), head, foot)
-}}
-
-var basePresetsCmd = &cobra.Command{Use: "presets", RunE: func(cmd *cobra.Command, args []string) error {
-	if err := requireAuthFields(); err != nil {
-		return err
-	}
-	cl := client.New(viper.GetString("email"), viper.GetString("password"), viper.GetString("user_id"), viper.GetString("client_id"), viper.GetString("client_secret"))
-	res, err := cl.Base().Presets(context.Background())
-	if err != nil {
-		return err
-	}
-	return output.Print(output.Format(viper.GetString("output")), []string{"presets"}, []map[string]any{{"presets": res}})
-}}
-
-var basePresetRunCmd = &cobra.Command{Use: "preset-run", RunE: func(cmd *cobra.Command, args []string) error {
-	if err := requireAuthFields(); err != nil {
-		return err
-	}
-	name := viper.GetString("name")
-	cl := client.New(viper.GetString("email"), viper.GetString("password"), viper.GetString("user_id"), viper.GetString("client_id"), viper.GetString("client_secret"))
-	return cl.Base().RunPreset(context.Background(), name)
-}}
-
-var baseTestCmd = &cobra.Command{Use: "test", RunE: func(cmd *cobra.Command, args []string) error {
-	if err := requireAuthFields(); err != nil {
-		return err
-	}
-	cl := client.New(viper.GetString("email"), viper.GetString("password"), viper.GetString("user_id"), viper.GetString("client_id"), viper.GetString("client_secret"))
-	return cl.Base().VibrationTest(context.Background())
 }}
 
 func init() {
 	baseAngleCmd.Flags().Int("head", 0, "head angle")
 	baseAngleCmd.Flags().Int("foot", 0, "foot angle")
-	viper.BindPFlag("head", baseAngleCmd.Flags().Lookup("head"))
-	viper.BindPFlag("foot", baseAngleCmd.Flags().Lookup("foot"))
-	basePresetRunCmd.Flags().String("name", "", "preset name")
-	viper.BindPFlag("name", basePresetRunCmd.Flags().Lookup("name"))
-
-	baseCmd.AddCommand(baseInfoCmd, baseAngleCmd, basePresetsCmd, basePresetRunCmd, baseTestCmd)
+	baseCmd.AddCommand(baseInfoCmd, baseAngleCmd)
 }

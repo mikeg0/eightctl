@@ -10,6 +10,7 @@ type DeviceActions struct{ c *Client }
 
 func (c *Client) Device() *DeviceActions { return &DeviceActions{c: c} }
 
+// Info fetches full device details from client-api (validated).
 func (d *DeviceActions) Info(ctx context.Context) (any, error) {
 	id, err := d.c.EnsureDeviceID(ctx)
 	if err != nil {
@@ -21,39 +22,7 @@ func (d *DeviceActions) Info(ctx context.Context) (any, error) {
 	return res, err
 }
 
-func (d *DeviceActions) Peripherals(ctx context.Context) (any, error) {
-	id, err := d.c.EnsureDeviceID(ctx)
-	if err != nil {
-		return nil, err
-	}
-	path := fmt.Sprintf("/devices/%s/peripherals", id)
-	var res any
-	err = d.c.do(ctx, http.MethodGet, path, nil, nil, &res)
-	return res, err
-}
-
-func (d *DeviceActions) Owner(ctx context.Context) (any, error) {
-	id, err := d.c.EnsureDeviceID(ctx)
-	if err != nil {
-		return nil, err
-	}
-	path := fmt.Sprintf("/devices/%s/owner", id)
-	var res any
-	err = d.c.do(ctx, http.MethodGet, path, nil, nil, &res)
-	return res, err
-}
-
-func (d *DeviceActions) Warranty(ctx context.Context) (any, error) {
-	id, err := d.c.EnsureDeviceID(ctx)
-	if err != nil {
-		return nil, err
-	}
-	path := fmt.Sprintf("/devices/%s/warranty", id)
-	var res any
-	err = d.c.do(ctx, http.MethodGet, path, nil, nil, &res)
-	return res, err
-}
-
+// Online checks device online status from client-api (validated).
 func (d *DeviceActions) Online(ctx context.Context) (any, error) {
 	id, err := d.c.EnsureDeviceID(ctx)
 	if err != nil {
@@ -65,24 +34,14 @@ func (d *DeviceActions) Online(ctx context.Context) (any, error) {
 	return res, err
 }
 
+// PrimingTasks fetches priming tasks from app-api (validated).
 func (d *DeviceActions) PrimingTasks(ctx context.Context) (any, error) {
 	id, err := d.c.EnsureDeviceID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	path := fmt.Sprintf("/devices/%s/priming/tasks", id)
+	path := fmt.Sprintf("/v1/devices/%s/priming/tasks", id)
 	var res any
-	err = d.c.do(ctx, http.MethodGet, path, nil, nil, &res)
-	return res, err
-}
-
-func (d *DeviceActions) PrimingSchedule(ctx context.Context) (any, error) {
-	id, err := d.c.EnsureDeviceID(ctx)
-	if err != nil {
-		return nil, err
-	}
-	path := fmt.Sprintf("/devices/%s/priming/schedule", id)
-	var res any
-	err = d.c.do(ctx, http.MethodGet, path, nil, nil, &res)
+	err = d.c.doApp(ctx, http.MethodGet, path, nil, nil, &res)
 	return res, err
 }
