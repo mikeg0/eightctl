@@ -37,8 +37,10 @@ func (m *MetricsActions) Summary(ctx context.Context, out any) error {
 	if err := m.c.requireUser(ctx); err != nil {
 		return err
 	}
+	q := url.Values{}
+	q.Set("metrics", "all")
 	path := fmt.Sprintf("/users/%s/metrics/summary", m.c.UserID)
-	return m.c.do(ctx, http.MethodGet, path, nil, nil, out)
+	return m.c.do(ctx, http.MethodGet, path, q, nil, out)
 }
 
 func (m *MetricsActions) Aggregate(ctx context.Context, out any) error {
@@ -46,6 +48,7 @@ func (m *MetricsActions) Aggregate(ctx context.Context, out any) error {
 		return err
 	}
 	q := url.Values{}
+	q.Set("metrics", "all")
 	q.Set("v2", "true")
 	path := fmt.Sprintf("/users/%s/metrics/aggregate", m.c.UserID)
 	return m.c.do(ctx, http.MethodGet, path, q, nil, out)

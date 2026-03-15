@@ -1,7 +1,9 @@
 package client
 
 import (
+	"compress/gzip"
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -101,3 +103,31 @@ func Test429Retry(t *testing.T) {
 		t.Fatalf("expected backoff, got %v", elapsed)
 	}
 }
+
+func TestDoHandlesGzipResponse(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/gzipped", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Encoding", "gzip")
+		gz := gzip.NewWriter(w)
+		json.NewEncoder(gz).Encode(map[string]string{"hello": "world"})
+		gz.Close()
+	})
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+
+	c := New("email", "pass", "uid", "", "")
+	c.BaseURL = srv.URL
+	c.token = "t"
+	c.tokenExp = time.Now().Add(time.Hour)
+	c.HTTP = srv.Client()
+
+	var out map[string]string
+	if err := c.do(context.Background(), http.MethodGet, "/gzipped", nil, nil, &out); err != nil {
+		t.Fatalf("do gzip: %v", err)
+	}
+	if out["hello"] != "world" {
+		t.Fatalf("expected {hello: world}, got %v", out)
+	}
+}
+

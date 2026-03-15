@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"crypto/tls"
 	"encoding/json"
@@ -120,8 +121,8 @@ func (c *Client) authTokenEndpoint(ctx context.Context) error {
 		"grant_type":    "password",
 		"username":      c.Email,
 		"password":      c.Password,
-		"client_id":     "sleep-client",
-		"client_secret": "",
+		"client_id":     c.ClientID,
+		"client_secret": c.ClientSecret,
 	}
 	body, _ := json.Marshal(payload)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, authURL, bytes.NewReader(body))
@@ -288,6 +289,15 @@ func (c *Client) do(ctx context.Context, method, path string, query url.Values, 
 		return err
 	}
 	defer resp.Body.Close()
+	var bodyReader io.Reader = resp.Body
+	if resp.Header.Get("Content-Encoding") == "gzip" {
+		gr, err := gzip.NewReader(resp.Body)
+		if err != nil {
+			return err
+		}
+		defer gr.Close()
+		bodyReader = gr
+	}
 	if resp.StatusCode == http.StatusTooManyRequests {
 		time.Sleep(2 * time.Second)
 		return c.do(ctx, method, path, query, body, out)
@@ -301,11 +311,11 @@ func (c *Client) do(ctx context.Context, method, path string, query url.Values, 
 		return c.do(ctx, method, path, query, body, out)
 	}
 	if resp.StatusCode >= 300 {
-		b, _ := io.ReadAll(resp.Body)
+		b, _ := io.ReadAll(bodyReader)
 		return fmt.Errorf("api %s %s: %s", method, path, string(b))
 	}
 	if out != nil {
-		return json.NewDecoder(resp.Body).Decode(out)
+		return json.NewDecoder(bodyReader).Decode(out)
 	}
 	return nil
 }
@@ -376,20 +386,35 @@ type SleepDay struct {
 	Date          string  `json:"day"`
 	Score         float64 `json:"score"`
 	Tnt           int     `json:"tnt"`
-	Respiratory   float64 `json:"respiratoryRate"`
-	HeartRate     float64 `json:"heartRate"`
-	LatencyAsleep float64 `json:"latencyAsleepSeconds"`
-	LatencyOut    float64 `json:"latencyOutSeconds"`
-	Duration      float64 `json:"sleepDurationSeconds"`
-	Stages        []Stage `json:"stages"`
-	SleepQuality  struct {
-		HRV struct {
-			Score float64 `json:"score"`
-		} `json:"hrv"`
-		Resp struct {
-			Score float64 `json:"score"`
-		} `json:"respiratoryRate"`
-	} `json:"sleepQualityScore"`
+	Duration      float64 `json:"sleepDuration"`
+	DeepDuration  float64 `json:"deepDuration"`
+	RemDuration   float64 `json:"remDuration"`
+	LightDuration float64 `json:"lightDuration"`
+	DeepPercent   float64 `json:"deepPercent"`
+	RemPercent    float64 `json:"remPercent"`
+	PresenceStart string  `json:"presenceStart"`
+	PresenceEnd   string  `json:"presenceEnd"`
+	SleepStart    string  `json:"sleepStart"`
+	SleepEnd      string  `json:"sleepEnd"`
+	SleepQuality  SleepQualityScore `json:"sleepQualityScore"`
+}
+
+// SleepQualityScore contains detailed sleep quality metrics from the API.
+type SleepQualityScore struct {
+	Total       float64     `json:"total"`
+	HRV         SleepMetric `json:"hrv"`
+	HeartRate   SleepMetric `json:"heartRate"`
+	Respiratory SleepMetric `json:"respiratoryRate"`
+	Deep        SleepMetric `json:"deep"`
+	Rem         SleepMetric `json:"rem"`
+	Waso        SleepMetric `json:"waso"`
+}
+
+// SleepMetric represents a single sleep metric with current value and statistics.
+type SleepMetric struct {
+	Current float64 `json:"current"`
+	Average float64 `json:"average"`
+	Score   float64 `json:"score"`
 }
 
 // Stage represents sleep stage duration.
