@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -49,7 +50,11 @@ var alarmDismissCmd = &cobra.Command{Use: "dismiss <id>", Args: cobra.ExactArgs(
 		return err
 	}
 	cl := client.New(viper.GetString("email"), viper.GetString("password"), viper.GetString("user_id"), viper.GetString("client_id"), viper.GetString("client_secret"))
-	return cl.Alarms().Dismiss(context.Background(), args[0])
+	if err := cl.Alarms().Dismiss(context.Background(), args[0]); err != nil {
+		return err
+	}
+	fmt.Printf("Alarm %s dismissed.\n", args[0])
+	return nil
 }}
 
 var alarmDismissAllCmd = &cobra.Command{Use: "dismiss-all", RunE: func(cmd *cobra.Command, args []string) error {
@@ -57,7 +62,11 @@ var alarmDismissAllCmd = &cobra.Command{Use: "dismiss-all", RunE: func(cmd *cobr
 		return err
 	}
 	cl := client.New(viper.GetString("email"), viper.GetString("password"), viper.GetString("user_id"), viper.GetString("client_id"), viper.GetString("client_secret"))
-	return cl.Alarms().DismissAll(context.Background())
+	if err := cl.Alarms().DismissAll(context.Background()); err != nil {
+		return err
+	}
+	fmt.Println("All alarms dismissed.")
+	return nil
 }}
 
 var alarmVibeCmd = &cobra.Command{Use: "vibration-test", RunE: func(cmd *cobra.Command, args []string) error {

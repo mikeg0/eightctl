@@ -330,7 +330,7 @@ func (c *Client) doWithHost(ctx context.Context, host, method, path string, quer
 	}
 	if resp.StatusCode >= 300 {
 		b, _ := io.ReadAll(bodyReader)
-		return fmt.Errorf("api %s %s: %s", method, path, string(b))
+		return fmt.Errorf("api %s %s: %d %s", method, path, resp.StatusCode, string(b))
 	}
 	if out != nil {
 		return json.NewDecoder(bodyReader).Decode(out)
@@ -352,9 +352,13 @@ func (c *Client) setPower(ctx context.Context, on bool) error {
 	if err := c.requireUser(ctx); err != nil {
 		return err
 	}
-	path := fmt.Sprintf("/users/%s/devices/power", c.UserID)
-	body := map[string]bool{"on": on}
-	return c.do(ctx, http.MethodPost, path, nil, body, nil)
+	stateType := "off"
+	if on {
+		stateType = "smart"
+	}
+	path := fmt.Sprintf("/v1/users/%s/temperature", c.UserID)
+	body := map[string]any{"currentState": map[string]string{"type": stateType}}
+	return c.doApp(ctx, http.MethodPut, path, nil, body, nil)
 }
 
 func (c *Client) Identity() tokencache.Identity {
